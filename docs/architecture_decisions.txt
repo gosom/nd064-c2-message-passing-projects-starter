@@ -1,0 +1,20 @@
+The external communication with the system will be the Flask Rest API.
+The clients do not need to be modified and the API will play the role of the
+orchestrator between microservices.
+
+The ConnectionService is responsible to fetch connections between users from
+PostgresSQL. It will expose a REST API. I chose REST here since this service
+only reads from Postgres. Reading from Postgres will be slower than the
+communication, so I don't see a reason to use GRPC here.
+
+The UserService communicates with the API via GRPC. I preferred GRPC here
+since it's offers better perfomance and I am expecting database queries to be
+fast and with GRPC we will have better perfomance. UserService is using Kafka
+for Write operations (CreateUserCommand). 
+
+LocationService is used to sent Location data to Kafka. API will use GRPC
+to sent the location data to the Service and LocationService will emit
+CreateLocationCommands to Kafka.
+
+There are also 2 Kafka Consumers one for consuming CreateLocationCommand
+and one for consuming CreateUserCommand. These will save to Postgres.
