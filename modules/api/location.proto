@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+message LocationMessage {
+  int64 id = 1;
+  int64 person_id = 2;
+  string longitude = 3;
+  string latitude = 4;
+  int64 creation_time = 5;
+}
+
+message LocationMessageList {
+  repeated LocationMessage locations = 1;
+}
+
+message SearchRequest {
+    int64 person_id = 1;
+    int64 start_date = 2;
+    int64 end_date = 3;
+}
+
+message ConnectionQuery {
+    int64 person_id = 1;
+    int64 start_date = 2;
+    int64 end_date = 3;
+    int64 meters = 4;
+    string longitude = 5;
+    string latitude = 6;
+}
+
+message LocationRequest {
+    int64 id = 1;
+}
+
+service LocationService {
+    rpc Create(LocationMessage) returns (LocationMessage);
+    rpc Get(LocationRequest) returns (LocationMessage);
+    rpc All(SearchRequest) returns (LocationMessageList);
+    rpc Connections(ConnectionQuery) returns (LocationMessageList);
+}

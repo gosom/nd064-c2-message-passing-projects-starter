@@ -21,6 +21,8 @@ Vagrant.configure("2") do |config|
     master.vm.network "forwarded_port", guest: 22, host: 2222, id: "ssh", disabled: true
     master.vm.network "forwarded_port", guest: 22, host: 2000 # Master Node SSH
     master.vm.network "forwarded_port", guest: 6443, host: 6443 # API Access
+    master.vm.network "forwarded_port", guest: 31535, host: 31535 # DB
+    master.vm.provision "file", source: "./get-k3s.sh", destination: "./get-k3s.sh"
     for p in 30000..30100 # expose NodePort IP's
       master.vm.network "forwarded_port", guest: p, host: p, protocol: "tcp"
       end
@@ -33,7 +35,7 @@ Vagrant.configure("2") do |config|
       sudo zypper --non-interactive install bzip2
       sudo zypper --non-interactive install etcd
       sudo zypper --non-interactive install apparmor-parser
-      curl -sfL https://get.k3s.io | sh -
+      sh /home/vagrant/get-k3s.sh
     SHELL
   end
 
