@@ -1,5 +1,7 @@
 import logging
+import time
 from datetime import datetime, timedelta
+import json
 
 from app.udaconnect.models import Connection, Location
 from app.udaconnect.schemas import ConnectionSchema, LocationSchema, PersonSchema
@@ -48,7 +50,7 @@ class ConnectionService:
                 end_date=int(end_date.timestamp()),
         )
 
-        locations = [LocationData(e.id, e.person_id, e.longitude, e.latitude, e.creation_time)
+        locations = [Location(e.id, e.person_id, e.longitude, e.latitude, e.creation_time)
                 for e in cls.stub.All(req).locations]
         logger.info(locations)
 
@@ -70,7 +72,7 @@ class ConnectionService:
             other = cls.stub.Connections(q).locations
             for l in other:
                 con = Connection(person=person_map[l.person_id],
-                        location=LocationData(l.id, l.person_id, l.longitude, l.latitude, l.creation_time),
+                        location=Location(l.id, l.person_id, l.longitude, l.latitude, l.creation_time),
                         )
 
                 result.append(con)
@@ -93,27 +95,25 @@ class LocationService:
                 id=int(location_id),
         )
         ans = cls.stub.Get(req)
-        location = LocationData(ans.id, ans.person_id, ans.longitude, ans.latitude, ans.creation_time)
+        location = Location(ans.id, ans.person_id, ans.longitude, ans.latitude, ans.creation_time)
         return location
 
     @classmethod
     def create(cls, location):
+        cls.init()
         validation_results = LocationSchema().validate(location)
         if validation_results:
             logger.warning(f"Unexpected data format in payload: {validation_results}")
             raise Exception(f"Invalid payload: {validation_results}")
 
-        # TODO
-        return None
-        #new_location = Location()
-        #new_location.person_id = location["person_id"]
-        #new_location.creation_time = location["creation_time"]
-        #new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
-        #db.session.add(new_location)
-        #db.session.commit()
-
-        #return new_location
-
+        req = location_pb2.LocationMessage(
+                person_id=int(location["person_id"]),
+                longitude=location["longitude"],
+                latitude=location["latitude"],
+                creation_time=int(time.time()),
+        )
+        ans = cls.stub.Create(req)
+        return ans
 
 class PersonService:
     session = None

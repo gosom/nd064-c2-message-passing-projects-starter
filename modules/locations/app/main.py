@@ -1,23 +1,35 @@
+import os
 import logging
 import time
 from concurrent import futures
+import json
 
 import grpc
 import location_pb2
 import location_pb2_grpc
-
 import psycopg2
 import psycopg2.extras
+from kafka import KafkaProducer
 
 
 class LocationServicer(location_pb2_grpc.LocationServiceServicer):
 
-    def __init__(self, db, ):
-        self.db = db
+    def __init__(self, db, broker, topic_name):
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.db = db
+        self.broker = broker
+        self.topic_name = topic_name
 
     def Create(self, request, context):
-        return location_pb2.Empty()
+        msg = {
+                "person_id": request.person_id,
+                "longitude": request.longitude,
+                "latitude": request.latitude,
+                "creation_time": request.creation_time,
+              }
+        self.broker.send(self.topic_name, json.dumps(msg).encode('utf-8'))
+        self.broker.flush()
+        return request
 
     def Get(self, request, context):
         q = """
@@ -100,14 +112,18 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
 def main():
     logging.basicConfig(level=logging.DEBUG)
     db = psycopg2.connect(
-            host="db",
-            database="udaconnect",
-            user="udaconnect",
-            password="secret",
+            host=os.environ["DB_HOST"],
+            database=os.environ["DB_NAME"],
+            user=os.environ["DB_USERNAME"],
+            password=os.environ["DB_PASSWORD"],
             )
 
+    producer = KafkaProducer(
+            bootstrap_servers=[os.environ["KAFKA_ADDR"],],
+        )
 
-    location_service = LocationServicer(db)
+
+    location_service = LocationServicer(db, producer, os.environ["KAFKA_TOPIC"])
 
     # Initialize gRPC server
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=2))
@@ -115,7 +131,6 @@ def main():
     location_pb2_grpc.add_LocationServiceServicer_to_server(location_service, server)
 
 
-    print("Server starting on port 5005...")
     server.add_insecure_port("[::]:5005")
     server.start()
     # Keep thread alive
@@ -128,7 +143,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-

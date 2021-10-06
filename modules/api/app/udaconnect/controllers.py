@@ -29,8 +29,8 @@ class LocationResource(Resource):
     @responds(schema=LocationSchema)
     def post(self) -> LocationSchema:
         request.get_json()
-        location: Location = LocationService.create(request.get_json())
-        return location
+        LocationService.create(request.get_json())
+        return None, 202
 
     @responds(schema=LocationSchema)
     def get(self, location_id) -> LocationSchema:
