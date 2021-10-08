@@ -1,0 +1,48 @@
+### GRPC documentation for LocationService.
+
+The request has a payload with person_id, latitude, longitude and creation_time.
+
+It exposes the following methods:
+
+// To save a new Location
+Create(LocationMessage) returns (LocationMessage);
+// To get a location by id
+Get(LocationRequest) returns (LocationMessage);
+// Returns all locations for a person_id between start and end data
+All(SearchRequest) returns (LocationMessageList);
+// Returns all locations that the distance between them is below meters
+Connections(ConnectionQuery) returns (LocationMessageList);
+
+LocationMessage:
+    id
+    person_id
+    longitude
+    latitude
+    creation_time
+
+Notes:  
+    a. creation time is unix epoch
+    b. id can be empty when calling Create
+
+LocationRequest:
+    id // the id of the location to fetch
+
+
+SearchRequest:
+    person_id
+    start_date // unix timestamp
+    end_date // unix timestamp
+
+LocationMessageList:
+    A list of LocationMessage
+
+ConnectionQuery:
+     person_id
+     start_date // unix timestamp
+     end_date //unix timestamp
+     meters
+     longitude
+     latitude
+
+For more details see the location.proto file and for sample usage
+you can check modules/api/app/udaconnect/services.py (LocationService & ConnectionService)
