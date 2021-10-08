@@ -1,5 +1,8 @@
 # UdaConnect
+
+
 ## Overview
+
 ### Background
 Conferences and conventions are hotspots for making connections. Professionals in attendance often share the same interests and can make valuable business and personal connections with one another. At the same time, these events draw a large crowd and it's often hard to make these connections in the midst of all of these events' excitement and energy. To help attendees make connections, we are building the infrastructure for a service that can inform attendees if they have attended the same booths and presentations at an event.
 
@@ -20,6 +23,7 @@ To do so, ***you will refactor this application into a microservice architecture
 * [K3s](https://k3s.io/) - Lightweight distribution of K8s to easily develop against a local cluster
 
 ## Running the app
+
 The project has been set up such that you should be able to have the project up and running with Kubernetes.
 
 ### Prerequisites
@@ -75,15 +79,51 @@ Type `exit` to exit the virtual OS and you will find yourself back in your compu
 
 Afterwards, you can test that `kubectl` works by running a command like `kubectl describe services`. It should not return any errors.
 
-### Steps
-1. `kubectl apply -f deployment/db-configmap.yaml` - Set up environment variables for the pods
-2. `kubectl apply -f deployment/db-secret.yaml` - Set up secrets for the pods
-3. `kubectl apply -f deployment/postgres.yaml` - Set up a Postgres database running PostGIS
-4. `kubectl apply -f deployment/udaconnect-api.yaml` - Set up the service and deployment for the API
-5. `kubectl apply -f deployment/udaconnect-app.yaml` - Set up the service and deployment for the web app
-6. `sh scripts/run_db_command.sh <POD_NAME>` - Seed your database against the `postgres` pod. (`kubectl get pods` will give you the `POD_NAME`)
+#### SETUP KAFKA
 
-Manually applying each of the individual `yaml` files is cumbersome but going through each step provides some context on the content of the starter project. In practice, we would have reduced the number of steps by running the command against a directory to apply of the contents: `kubectl apply -f deployment/`.
+**1. add the chart repository below.**
+```shell
+$ helm repo add bitnami https://charts.bitnami.com/bitnami
+
+$ helm repo list
+
+NAME        	URL                                           
+bitnami     	https://charts.bitnami.com/bitnami            
+```
+
+**2. Install the kafka helm chart**
+```shell
+$ helm install kafka-release bitnami/kafka           
+
+You'll see an output like that.
+
+NAME: kafka-release
+LAST DEPLOYED: Fri Oct 08 10:32:26 2021
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+...
+```
+
+wait a bit
+
+**3. ckeck that kafka is running:**
+
+you should see something similar to the below
+
+```shell
+$ kubectl get pods
+NAME                        READY   STATUS    RESTARTS   AGE
+kafka-release-zookeeper-0   1/1     Running   0          1m10s
+kafka-release-0             1/1     Running   1          1m10s
+```
+
+### Deploy K8s
+
+
+`kubectl apply -f deployment/`
 
 Note: The first time you run this project, you will need to seed the database with dummy data. Use the command `sh scripts/run_db_command.sh <POD_NAME>` against the `postgres` pod. (`kubectl get pods` will give you the `POD_NAME`). Subsequent runs of `kubectl apply` for making changes to deployments or services shouldn't require you to seed the database again!
 
