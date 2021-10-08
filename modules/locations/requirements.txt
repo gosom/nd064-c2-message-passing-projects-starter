@@ -1,0 +1,4 @@
+grpcio==1.41.0
+grpcio-tools==1.41.0
+kafka-python==2.0.2
+psycopg2==2.9.1

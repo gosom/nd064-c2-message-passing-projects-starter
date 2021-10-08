@@ -1,0 +1,19 @@
+The external communication with the system will be the Flask Rest API.
+The clients do not need to be modified and the API will play the role of the
+orchestrator between microservices.
+
+
+The UserService communicates with the API via REST. Rest is well known and
+easy to use. We can also utilize easy caching on the network layer using the urlpath as key.
+
+
+LocationService exposes a Grpc interface. We expect a lot incoming location
+and we can benefit from the perfomance characteristics of grpc. 
+Location write requests are put in a Kafka bus for asynchronous writing to the db.
+This way we can keep our database load under control when we have a lot of locations to write.
+The writes are performed by the LocationWrited which listens to a kafka topic and consumes messages
+
+The flask app has also a class ConnectionService. In the new design this class is using 
+the UserService to fetch user information and the LocationService to fetch
+location information. 
+

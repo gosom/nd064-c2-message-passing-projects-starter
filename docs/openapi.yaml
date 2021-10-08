@@ -1,0 +1,189 @@
+openapi: 3.0.0
+info:
+  version: 'v0.9'
+  title: 'UdaconnectAPI'
+servers:
+  - url: 'localhost:30001/api'
+paths:
+  /locations:
+    post:
+      operationId: createLocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+      responses:
+        '200':
+          description: 'Empty response'
+
+  /locations/{locationId}:
+    get:
+      parameters:
+      - name: locationId
+        schema:
+          type: integer
+        in: path
+        required: true
+      responses:
+        '200':
+           description: A location objec
+           content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Location'
+
+  /persons:
+    get:
+      summary: 'Returns all persons'
+      operationId: listPersons
+      responses:
+        '200':
+          description: 'List of all users'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    $ref: '#/components/schemas/Person'
+    post:
+        summary: 'Create a Person'
+        operationId: createPerson
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        responses:
+          '200':
+            description: 'Created new Person'
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Person'
+  /persons/{personId}:
+    get:
+      summary: 'Returns a person by id'
+      operationId: getPersonById
+      parameters:
+      - name: personId
+        in: path
+        description: ID of the person to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: ' Person Datausers'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+  /persons/{personId}/connection:
+    get:
+      summary: 'Returns the connections for person'
+      operationId: getPersonConnections
+      parameters:
+      - name: personId
+        in: path
+        description: ID of the person to get
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      - name: start_date
+        required: true
+        in: query
+        description: start date
+        schema:
+          type: string
+          example: '2020-01-01'
+      - name: end date
+        required: true
+        in: query
+        description: end date
+        schema:
+          type: string
+          example: '2020-01-01'
+      - name: distance
+        in: query
+        description: distance in meters
+        required: true
+        schema:
+          type: integer
+          example: 5
+          default: 5
+      responses:
+        '200':
+          description: 'List of person connections'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                    $ref: '#/components/schemas/Connection'
+
+
+components:
+  schemas:
+    Connection:
+      type: object
+      required:
+        - location
+        - person
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        person:
+          $ref: '#/components/schemas/Person'
+    Location:
+      type: object
+      required:
+        - id
+        - person_id
+        - latitude
+        - longitude
+        - creation_time
+      properties:
+        id:
+          type: integer
+          example: 29
+        person_id:
+          type: integer
+          example: 1
+        latitude:
+            type: string
+            example: "37.553441"
+        longitude:
+            type: string
+            example: "-122.290524"
+        creation_time:
+            type: string
+            example: "2020-08-18T10:37:06"
+        
+    Person:
+      type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - company_name
+      properties:
+        id:
+          type: integer
+          example: 1
+        first_name:
+          type: string
+          example: Taco
+        last_name:
+            type: string
+            example: Fargo
+        company_name:
+            type: string
+            example: Alpha Omega Upholstery
+        
