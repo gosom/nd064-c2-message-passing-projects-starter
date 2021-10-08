@@ -123,6 +123,3 @@ app/app-test.db
 
 .vagrant
 .ds_store
-
-*_pb2.py
-*_pb2_grpc.py
